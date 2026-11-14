@@ -3,12 +3,29 @@
 The AMP template's versions. Each one raises `Meta.ConfigVersion` in `swatted.kvp`; after the merge, AMP takes it with
 **Fetch** and the instance's **Update** (README, step 11).
 
+## [4] – 2026-11-14
+
+### Changed
+
+- **Sleep mode on** again, as in version 2 (`App.SupportsUniversalSleep=True`,
+  `App.UniversalSleepApplicationUDPPortRef=GamePort`, `Limits.SleepMode=True`). CubeCoders switched sleep off in their
+  own templates (October 2026); a template from another repository keeps its own setting. Use AMP 2.8.0.10 or newer.
+- README: sleep mode again; the AMP 2.8 upgrade error ("--main") and its way round (a new instance) in step 11 and the
+  troubleshooting.
+
+### Fixed
+
+- The reason in version 3 was wrong: sleep mode did not make AMP hang in "Stopping". The instance never got version 2:
+  AMP's template upgrade failed ("Config manifest file does not exist:
+  Plugins/ADSModule/DeploymentTemplates/--main/swattedconfig.json"), and the hang came with that failed upgrade.
+
 ## [3] – 2026-11-14
 
 ### Changed
 
 - **Sleep mode off** again (`App.SupportsUniversalSleep=False`, `Limits.SleepMode=False`): AMP 2.8 has switched sleep
-  mode off for all Generic-module templates for now, and with it on AMP hung in "Stopping" after the server had ended.
+  mode off for all Generic-module templates for now. (A second reason given here, that sleep mode made AMP hang in
+  "Stopping", was wrong - see [4].)
   The player IDs in the join / leave lines and the RAM limit stay.
 - README: the sleep mode section says why; troubleshooting for "Stopping".
 
