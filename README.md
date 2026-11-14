@@ -15,6 +15,7 @@ guide quotes them as they appear, with their meaning next to them.
 | `swattedupdates.json` | "Update": fetch the server archive from your download address and unpack it |
 | `swattedmetaconfig.json` | empty (the server has no config file) |
 | `manifest.json` | identifies this template repository `Lappen32/Swatted-Server` (see step 2) |
+| `CHANGELOG.md` | the template's versions (`Meta.ConfigVersion`) |
 
 **Status:** server start, console, log, the RAM limit and a game against bots are tested locally
 (`tests/dedicated_server_test` in the game's repository, also with the exported Windows build). The template - its
@@ -44,8 +45,8 @@ game. AMP has no field for credentials there, so this repository must stay **pub
 
 **Changing the template:** this repository is the template's only copy (the game's repository no longer holds one).
 The game's `tests/dedicated_server_test` checks a checkout of it against the server:
-`godot --headless --path . res://tests/dedicated_server_test.tscn -- --amp=<path to this checkout>`. After a change,
-commit, push, and click **Fetch** in AMP again.
+`godot --headless --path . res://tests/dedicated_server_test.tscn -- --amp=<path to this checkout>`. A change raises
+`Meta.ConfigVersion` in `swatted.kvp` and gets a section in `CHANGELOG.md`; after the merge, update AMP (step 11).
 
 ## 3. Create the instance
 
@@ -164,6 +165,17 @@ normal / hard), `time` (day / night / random), `season` (map / spring / summer /
 1. Put the new server archive at the same download address, or upload it.
 2. Click **Update**.
 3. Restart the server.
+
+The players need the same game version as the server.
+
+## 11. New template version
+
+When this repository changed (see `CHANGELOG.md`):
+
+1. In AMP (the ADS instance): **Configuration → Instance Deployment → Configuration Repositories → Fetch**.
+2. In the instance list, click the **Update** button on the Swatted instance's tile (older AMP versions: right-click
+   the instance → **Refresh Configuration**). Only this takes the new template; "Update" inside the instance does not.
+3. Open the instance, check the new settings, and restart the server.
 
 ## Troubleshooting
 
