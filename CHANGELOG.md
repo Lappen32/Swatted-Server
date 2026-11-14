@@ -3,6 +3,23 @@
 The AMP template's versions. Each one raises `Meta.ConfigVersion` in `swatted.kvp`; after the merge, AMP takes it with
 **Fetch** and the instance's **Update** (README, step 11).
 
+## [5] – 2026-11-14
+
+Best with a Swatted server build from 0.11.0 on that names its memory manager in the log (the branch
+`worktree-feat-server-ram-saver` of the game on); an older build runs with jemalloc too, it only does not say so.
+
+### Added
+
+- **jemalloc on Linux:** AMP installs `libjemalloc2` into the container (`Meta.ExtraContainerPackages`), the start
+  preloads it (`App.EnvironmentVariables`: `LD_PRELOAD`, `MALLOC_CONF` with a background thread that gives freed memory
+  back after a second; `MALLOC_ARENA_MAX` 2 for glibc where jemalloc is missing). Measured with the exported build:
+  the empty server 191 instead of 375 MB, a mission 353 instead of 403 MB, back in the lobby 313 instead of 403 MB.
+
+### Changed
+
+- README step 7: jemalloc, the measurements, how to check it, the hard limit (512 MB), why the frame rate stays;
+  the troubleshooting for `Speicherverwaltung: glibc`. The setting "Maximaler RAM" names the new figures.
+
 ## [4] – 2026-11-14
 
 ### Changed
