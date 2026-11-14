@@ -112,7 +112,7 @@
         "DisplayName": "Maximaler RAM",
         "Category": "Swatted:stadia_controller",
         "Subcategory": "Server:dns:1",
-        "Description": "So viel Arbeitsspeicher soll der Server höchstens belegen (MB, 0 = keine Grenze). Wird es knapp, behält er im Einsatz weniger Objekte am Boden, darüber warnt die Konsole; „status“ zeigt den Verbrauch. Der leere Server braucht etwa 500 MB, ein Einsatz mehr. Eine harte Grenze ist das Speicherlimit des Containers (Instanz bearbeiten)",
+        "Description": "So viel Arbeitsspeicher soll der Server höchstens belegen (MB, 0 = keine Grenze). Wird es knapp, behält er im Einsatz weniger Objekte am Boden, darüber warnt die Konsole; „status“ zeigt den Verbrauch. Unter Linux mit jemalloc braucht der leere Server etwa 200 MB, ein Einsatz rund 350 – 430 MB; 512 MB reichen. Eine harte Grenze ist das Speicherlimit des Containers (Instanz bearbeiten)",
         "Keywords": "ram,memory,speicher,arbeitsspeicher,limit",
         "FieldName": "maxram",
         "InputType": "number",

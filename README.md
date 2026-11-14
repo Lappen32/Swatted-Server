@@ -9,7 +9,7 @@ guide quotes them as they appear, with their meaning next to them.
 
 | File | Contents |
 |---|---|
-| `swatted.kvp` | program, command line, stop command `quit`, detection of "Server bereit" (ready), joins and leaves, sleep mode |
+| `swatted.kvp` | program, command line, stop command `quit`, detection of "Server bereit" (ready), joins and leaves, sleep mode, jemalloc |
 | `swattedconfig.json` | the settings in AMP: Server (with the RAM limit), Einsatz (mission), Download |
 | `swattedports.json` | UDP port 47250 |
 | `swattedupdates.json` | "Update": fetch the server archive from your download address and unpack it |
@@ -19,7 +19,8 @@ guide quotes them as they appear, with their meaning next to them.
 
 **Status:** server start, console, log, the RAM limit and a game against bots are tested locally
 (`tests/dedicated_server_test` in the game's repository, also with the exported Windows build). On AMP 2.8 (Linux,
-Docker) start, console and stop work; sleep mode (on again in template version 4) is not tried there yet.
+Docker) start, console and stop work; sleep mode (on again in template version 4) is not tried there yet. jemalloc
+(template version 5) is measured with the exported Linux build, not yet in AMP's container.
 
 ## 1. Get the server archive
 
@@ -109,25 +110,51 @@ stops the server and listens on its UDP port itself. While the server sleeps it 
 * **Settings:** switching sleep off, the delays and "sleep on start" are AMP's own settings of the instance (its sleep
   mode section). With sleep off the server keeps running; an empty lobby costs little CPU but its RAM (about 400 MB).
 
-## 7. RAM limit
+## 7. RAM limit and jemalloc
 
 **Maximaler RAM** (MB) is passed as `--max-ram`. A Godot game cannot cap its own memory, so the limit is soft - the
 server watches itself:
 
 * Every 5 seconds it reads its memory (Linux: the resident memory, Windows: the working set). The console's `status`
-  shows it: `RAM 600 MB (Grenze 1024 MB, Spitze 610 MB)` (limit, highest so far).
-* At the start the log shows `RAM-Grenze: 1024 MB (der leere Server belegt 485 MB).` (the empty server's use). If the
-  limit leaves too little room for missions, it says so: `Warnung: Für Einsätze ist die RAM-Grenze knapp – besser
-  mindestens 1024 MB.` (the limit is tight, better at least …).
-* From 90 % of the limit, a running mission keeps only 100 objects on the server's floor (spent cases, magazines,
-  shards, rubble - nobody sees the server's floor; the players keep theirs).
-* Above the limit the log warns: `Warnung: RAM-Grenze überschritten – 1100 von 1024 MB.` (limit exceeded). The server
+  shows it: `RAM 350 MB (Grenze 512 MB, Spitze 360 MB)` (limit, highest so far).
+* At the start the log names the memory manager - `Speicherverwaltung: jemalloc (gibt freien Speicher ans System
+  zurück).` (jemalloc, gives free memory back to the system) - and the limit: `RAM-Grenze: 512 MB (der leere Server
+  belegt 191 MB).` (the empty server's use). If the limit leaves too little room for missions, it says so: `Warnung:
+  Für Einsätze ist die RAM-Grenze knapp – besser mindestens 512 MB.` (the limit is tight, better at least …).
+* From 90 % of the limit, a running mission keeps only 100 objects on the server's floor, above the limit only 15
+  (spent cases, magazines, shards, rubble - nobody sees the server's floor; the players keep theirs).
+* Above the limit the log warns: `Warnung: RAM-Grenze überschritten – 540 von 512 MB.` (limit exceeded). The server
   keeps running.
+* The server paints no floor or wall textures (nobody sees them): that saves about 50 - 70 MB in a mission.
 
-An empty server needs about 400 MB (the exported build), a mission more, depending on the map and the enemies. The
-memory stays near the largest mission played until the server stops; the sleep mode frees all of it. For a **hard**
-limit, run the instance in a Docker container and set AMP's container memory limit (edit the instance in AMP's
-instance list): at that limit the system ends the server.
+**jemalloc** (template version 5): on Linux the server runs with the memory manager jemalloc. AMP installs the
+package `libjemalloc2` into the instance's Docker container (`Meta.ExtraContainerPackages`), and the start preloads it
+(`LD_PRELOAD`, set in `App.EnvironmentVariables` with its settings in `MALLOC_CONF`). Linux's default memory manager
+(glibc) keeps memory the game has freed: the empty server stays at the peak it reached while loading the game's
+scripts, and after a mission at that mission's peak. jemalloc gives it back within about a second. Measured with the
+exported Linux build (game 0.11.0, the practice map, enemies "Viele"):
+
+| | glibc | jemalloc |
+|---|---|---|
+| empty server | 375 MB | 191 MB |
+| mission | 403 MB | 353 MB |
+| back in the lobby | 403 MB | 313 MB |
+| largest random map, three missions | up to 444 MB | up to 378 MB (430 for a moment while the level is built) |
+
+* **Check:** the log line `Speicherverwaltung: jemalloc`. It reads `glibc` when jemalloc did not load.
+* **Without Docker** (AMP directly on a Linux host): install it there (`apt install libjemalloc2`). Without it the
+  console shows `ERROR: ld.so: object 'libjemalloc.so.2' from LD_PRELOAD cannot be preloaded (cannot open shared
+  object file): ignored.` once per start, and the server runs with glibc as before.
+* **Windows:** does not apply (Windows' own heap; the variables are ignored).
+
+**Hard limit:** run the instance in a Docker container and set AMP's container memory limit (edit the instance in
+AMP's instance list): at that limit the system ends the server. Leave room for the peaks - loading the game's scripts
+takes up to ~390 MB for a moment, building a level up to ~430 MB; **512 MB** is enough with jemalloc for the maps
+measured. The sleep mode frees all of it while nobody plays.
+
+**Frame rate:** the server's 60 frames a second are fixed. A lower rate would save CPU, not memory - what the server
+holds depends on the level and its objects, not on how often it updates them - and the players' games run their bots'
+puppets at the same rate.
 
 ## 8. Playing
 
@@ -195,6 +222,8 @@ port again, upload the server archive or click **Update** in the instance (step 
 * **AMP stays at "Starting":** look at the console. "kein freier UDP-Port" (no free UDP port) means the port is taken.
   If the program is missing, Update ran without an archive (check the download address, or upload it by hand).
 * **Linux: "Permission denied":** click **Update** once; it sets the execute permission.
+* **The log says `Speicherverwaltung: glibc`:** jemalloc did not load (step 7). In Docker: update the instance to
+  template version 5 (step 11) and restart it, so AMP installs `libjemalloc2`; without Docker install it on the host.
 * **AMP stays at "Stopping":** the console shows `Server wird beendet.` but AMP does not finish. On AMP 2.8 this
   came with a template upgrade that had failed (step 11, the "--main" error): stop or restart the whole instance from
   ADS, and if the error comes again, use a new instance.
