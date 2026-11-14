@@ -1,0 +1,37 @@
+[
+    {
+        "UpdateStageName": "Server herunterladen (Linux)",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "{{DownloadUrlLinux}}",
+        "UpdateSourceArgs": "swatted-server-linux.zip",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": true,
+        "UpdateSourceConditionSetting": "DownloadMode",
+        "UpdateSourceConditionValue": "url",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Server herunterladen (Windows)",
+        "UpdateSourcePlatform": "Windows",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "{{DownloadUrlWindows}}",
+        "UpdateSourceArgs": "swatted-server-windows.zip",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": true,
+        "UpdateSourceConditionSetting": "DownloadMode",
+        "UpdateSourceConditionValue": "url",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Server ausführbar machen",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "SetExecutableFlag",
+        "UpdateSourceArgs": "{{$FullBaseDir}}Swatted.x86_64",
+        "SkipOnFailure": true
+    }
+]

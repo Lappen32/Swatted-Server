@@ -1,0 +1,9 @@
+[
+    {
+        "Protocol": "UDP",
+        "Port": 47250,
+        "Ref": "GamePort",
+        "Name": "Spiel-Port",
+        "Description": "UDP-Port, über den die Spieler beitreten (ENet). Im Spiel: Multiplayer → Beitreten → Adresse:Port"
+    }
+]

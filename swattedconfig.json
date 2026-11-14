@@ -1,0 +1,274 @@
+[
+    {
+        "DisplayName": "Servername",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Name des Servers, steht in der Lobby über der Spielerliste (höchstens 40 Zeichen)",
+        "Keywords": "server,name",
+        "FieldName": "name",
+        "InputType": "text",
+        "ParamFieldName": "name",
+        "IncludeInCommandLine": true,
+        "SkipIfEmpty": true,
+        "DefaultValue": "Swatted-Server",
+        "Placeholder": "Swatted-Server",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Passwort",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Passwort zum Beitreten. Leer lassen für einen Server ohne Passwort",
+        "Keywords": "server,password,passwort",
+        "FieldName": "password",
+        "InputType": "Password",
+        "ParamFieldName": "password",
+        "IncludeInCommandLine": true,
+        "SkipIfEmpty": true,
+        "DefaultValue": "",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Plätze",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Höchstens so viele Spieler nimmt der Server auf (2 bis 4)",
+        "Keywords": "max,players,spieler,plaetze",
+        "FieldName": "maxplayers",
+        "InputType": "number",
+        "MinValue": "2",
+        "MaxValue": "4",
+        "ParamFieldName": "max-players",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "4",
+        "Placeholder": "4",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Öffentliche Adresse",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Optional: die IPv4-Adresse, unter der die Spieler den Server erreichen. Dann zeigt das Server-Log auch einen 6-stelligen Lobby-Code (nur bei den Ports 47250, 47252, 47254, 47256)",
+        "Keywords": "address,ip,adresse,code",
+        "FieldName": "address",
+        "InputType": "text",
+        "ParamFieldName": "address",
+        "IncludeInCommandLine": true,
+        "SkipIfEmpty": true,
+        "DefaultValue": "",
+        "Placeholder": "z. B. 203.0.113.7",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Einstellungen sperren",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "An: nur der Server (diese Einstellungen und die Konsole) legt Karte und Einsatz fest. Aus: der Lobby-Leiter (wer am längsten in der Lobby ist) darf sie im Spiel ändern",
+        "Keywords": "lock,sperren,leader,leiter",
+        "FieldName": "locked",
+        "InputType": "checkbox",
+        "ParamFieldName": "locked",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "EnumValues": {
+            "False": "",
+            "True": "--locked "
+        }
+    },
+    {
+        "DisplayName": "UPnP",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Nur für einen Server zu Hause hinter einem Router: den Router per UPnP bitten, den UDP-Port zu öffnen. Auf gemieteten Servern aus lassen",
+        "Keywords": "upnp,router,port",
+        "FieldName": "upnp",
+        "InputType": "checkbox",
+        "ParamFieldName": "upnp",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "EnumValues": {
+            "False": "",
+            "True": "--upnp "
+        }
+    },
+    {
+        "DisplayName": "Zurück zur Lobby nach",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "So viele Sekunden nach dem Ende eines Einsatzes geht es automatisch zurück in die Lobby, falls der Lobby-Leiter nichts wählt (0 = nie)",
+        "Keywords": "end,return,lobby",
+        "FieldName": "endreturn",
+        "InputType": "number",
+        "MinValue": "0",
+        "MaxValue": "3600",
+        "Suffix": "s",
+        "ParamFieldName": "end-return",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "90",
+        "Placeholder": "90",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Karte",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Die Karte, mit der die Lobby startet: die ID einer Karte des Spiels (Konsolenbefehl „karten“ listet sie) oder random für eine zufällige Karte",
+        "Keywords": "map,karte",
+        "FieldName": "map",
+        "InputType": "text",
+        "ParamFieldName": "map",
+        "IncludeInCommandLine": true,
+        "SkipIfEmpty": true,
+        "DefaultValue": "practice",
+        "Placeholder": "practice",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Einsatz",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Der Spielmodus",
+        "Keywords": "mode,modus,einsatz",
+        "FieldName": "mode",
+        "InputType": "enum",
+        "ParamFieldName": "mode",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "jagd",
+        "EnumValues": {
+            "jagd": "Jagd",
+            "bombe": "Bombe",
+            "geiseln": "Geiseln"
+        }
+    },
+    {
+        "DisplayName": "Gegner",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Wie viele Terroristen",
+        "Keywords": "enemies,gegner,bots",
+        "FieldName": "enemies",
+        "InputType": "enum",
+        "ParamFieldName": "enemies",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "normal",
+        "EnumValues": {
+            "keine": "Keine",
+            "wenige": "Wenige",
+            "normal": "Normal",
+            "viele": "Viele"
+        }
+    },
+    {
+        "DisplayName": "Stärke",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Wie gut die Terroristen kämpfen",
+        "Keywords": "skill,staerke",
+        "FieldName": "skill",
+        "InputType": "enum",
+        "ParamFieldName": "skill",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "normal",
+        "EnumValues": {
+            "leicht": "Leicht",
+            "normal": "Normal",
+            "schwer": "Schwer"
+        }
+    },
+    {
+        "DisplayName": "Tageszeit",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Tag, Nacht oder zufällig",
+        "Keywords": "time,tageszeit,nacht",
+        "FieldName": "time",
+        "InputType": "enum",
+        "ParamFieldName": "time",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "tag",
+        "EnumValues": {
+            "tag": "Tag",
+            "nacht": "Nacht",
+            "zufall": "Zufällig"
+        }
+    },
+    {
+        "DisplayName": "Jahreszeit",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Die Jahreszeit der Karte (Karte = die der Karte selbst)",
+        "Keywords": "season,jahreszeit",
+        "FieldName": "season",
+        "InputType": "enum",
+        "ParamFieldName": "season",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "karte",
+        "EnumValues": {
+            "karte": "Karte",
+            "fruehling": "Frühling",
+            "sommer": "Sommer",
+            "herbst": "Herbst",
+            "winter": "Winter"
+        }
+    },
+    {
+        "DisplayName": "Friendly Fire",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Einsatz:map:2",
+        "Description": "Ob Spieler einander treffen können",
+        "Keywords": "friendly,fire",
+        "FieldName": "friendlyfire",
+        "InputType": "enum",
+        "ParamFieldName": "friendly-fire",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "an",
+        "EnumValues": {
+            "an": "An",
+            "aus": "Aus"
+        }
+    },
+    {
+        "DisplayName": "Download",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Download:download:3",
+        "Description": "Woher „Update“ den Server holt: von den Download-Adressen unten, oder Manuell (das Server-Archiv selbst per Dateimanager in den Ordner swatted hochladen und dort entpacken)",
+        "Keywords": "download,update,url",
+        "FieldName": "DownloadMode",
+        "InputType": "enum",
+        "ParamFieldName": "DownloadMode",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "manual",
+        "EnumValues": {
+            "url": "Von der Download-Adresse",
+            "manual": "Manuell hochladen"
+        }
+    },
+    {
+        "DisplayName": "Download-Adresse (Linux)",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Download:download:3",
+        "Description": "Direkter Download-Link auf Swatted-<Version>-server-linux.zip, z. B. ein Nextcloud-Freigabelink mit /download am Ende. Das Archiv liegt in jedem GitHub-Release",
+        "Keywords": "download,url,linux",
+        "FieldName": "DownloadUrlLinux",
+        "InputType": "url",
+        "ParamFieldName": "DownloadUrlLinux",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "Placeholder": "https://…/Swatted-0.11.0-server-linux.zip",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Download-Adresse (Windows)",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Download:download:3",
+        "Description": "Direkter Download-Link auf Swatted-<Version>-server-windows.zip (nur für AMP unter Windows)",
+        "Keywords": "download,url,windows",
+        "FieldName": "DownloadUrlWindows",
+        "InputType": "url",
+        "ParamFieldName": "DownloadUrlWindows",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "Placeholder": "https://…/Swatted-0.11.0-server-windows.zip",
+        "EnumValues": {}
+    }
+]
