@@ -109,6 +109,23 @@
         "EnumValues": {}
     },
     {
+        "DisplayName": "Maximaler RAM",
+        "Category": "Swatted:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "So viel Arbeitsspeicher soll der Server höchstens belegen (MB, 0 = keine Grenze). Wird es knapp, behält er im Einsatz weniger Objekte am Boden, darüber warnt die Konsole; „status“ zeigt den Verbrauch. Der leere Server braucht etwa 500 MB, ein Einsatz mehr. Eine harte Grenze ist das Speicherlimit des Containers (Instanz bearbeiten)",
+        "Keywords": "ram,memory,speicher,arbeitsspeicher,limit",
+        "FieldName": "maxram",
+        "InputType": "number",
+        "MinValue": "0",
+        "MaxValue": "65536",
+        "Suffix": "MB",
+        "ParamFieldName": "max-ram",
+        "IncludeInCommandLine": true,
+        "DefaultValue": "0",
+        "Placeholder": "0",
+        "EnumValues": {}
+    },
+    {
         "DisplayName": "Karte",
         "Category": "Swatted:stadia_controller",
         "Subcategory": "Einsatz:map:2",

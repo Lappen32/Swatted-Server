@@ -9,16 +9,17 @@ guide quotes them as they appear, with their meaning next to them.
 
 | File | Contents |
 |---|---|
-| `swatted.kvp` | program, command line, stop command `quit`, detection of "Server bereit" (ready), joins and leaves |
-| `swattedconfig.json` | the settings in AMP: Server, Einsatz (mission), Download |
+| `swatted.kvp` | program, command line, stop command `quit`, detection of "Server bereit" (ready), joins and leaves, sleep mode |
+| `swattedconfig.json` | the settings in AMP: Server (with the RAM limit), Einsatz (mission), Download |
 | `swattedports.json` | UDP port 47250 |
 | `swattedupdates.json` | "Update": fetch the server archive from your download address and unpack it |
 | `swattedmetaconfig.json` | empty (the server has no config file) |
 | `manifest.json` | identifies this template repository `Lappen32/Swatted-Server` (see step 2) |
+| `CHANGELOG.md` | the template's versions (`Meta.ConfigVersion`) |
 
-**Status:** server start, console, log and a game against bots are tested locally (`tests/dedicated_server_test` in
-the game's repository, also with the exported Windows build). The template has not yet been tried on a real AMP
-instance.
+**Status:** server start, console, log, the RAM limit and a game against bots are tested locally
+(`tests/dedicated_server_test` in the game's repository, also with the exported Windows build). The template - its
+sleep mode too - has not yet been tried on a real AMP instance.
 
 ## 1. Get the server archive
 
@@ -42,9 +43,10 @@ game. AMP has no field for credentials there, so this repository must stay **pub
    `Lappen32/Swatted-Server:main`.
 2. Click **Fetch**, then reload the page in your browser.
 
-**Changing the template:** the original lives in the game's repository under `tools/amp/`, where
-`tests/dedicated_server_test` checks it against the server. After a change, copy every file of that folder except
-`.gdignore` to the top level of this repository (no subfolder), commit, and click **Fetch** in AMP again.
+**Changing the template:** this repository is the template's only copy (the game's repository no longer holds one).
+The game's `tests/dedicated_server_test` checks a checkout of it against the server:
+`godot --headless --path . res://tests/dedicated_server_test.tscn -- --amp=<path to this checkout>`. A change raises
+`Meta.ConfigVersion` in `swatted.kvp` and gets a section in `CHANGELOG.md`; after the merge, update AMP (step 11).
 
 ## 3. Create the instance
 
@@ -65,6 +67,7 @@ Under **Configuration → Swatted**:
 | Einstellungen sperren | on = only the server sets map and mission; off = the lobby leader picks them in the game |
 | UPnP | only for a server at home behind a router: opens the port there |
 | Zurück zur Lobby nach | seconds after a mission until everyone is back in the lobby, unless the leader chooses first (0 = never) |
+| Maximaler RAM | the most memory the server should use, in MB; 0 = no limit (see step 7) |
 
 **Einsatz** (mission): the lobby's starting values – Karte (map: `practice` or `random`), Einsatz (mode: Jagd = hunt,
 Bombe = bomb, Geiseln = hostages), Gegner (enemies), Stärke (skill), Tageszeit (time of day), Jahreszeit (season),
@@ -86,7 +89,44 @@ counts the players who join or leave.
 The port is **UDP 47250**. AMP shows it under **Network** and can change it. This UDP port must be open in the
 server's firewall (and, for a server at home, in the router).
 
-## 6. Playing
+## 6. Sleep mode
+
+The template supports AMP's sleep mode, and it is **on** by default: once AMP has counted no player for 5 minutes, it
+stops the server and listens on its UDP port itself. While the server sleeps it uses no CPU and no RAM.
+
+* **Waking up:** the first player who joins wakes it. AMP starts the server, which takes a few seconds; the game keeps
+  trying for up to 20 seconds and shows "Verbinde … Ein Server im Ruhezustand braucht ein paar Sekunden." (connecting -
+  a sleeping server needs a few seconds), then the player is in the lobby. A game version without this retry gives up
+  after 8 seconds: join again once the console shows `Server bereit`.
+* **Back to sleep:** woken, but nobody joined within 2 minutes (the doze delay), the server sleeps again. Any packet on
+  the port wakes it, also a stray port scan - the doze delay puts it back to sleep.
+* **Counting players:** AMP counts them by the log lines `Beigetreten: <name> (n/max), ID <id>` (joined) and
+  `Verlassen: <name> (n/max), ID <id>` (left). The ID keeps two players of the same name apart. A server build from
+  before the ID logs the lines without it; the template still reads them, by name.
+* **Settings:** switching sleep off, the delays and "sleep on start" are AMP's own settings of the instance (its sleep
+  mode section). With sleep off the server keeps running; an empty lobby costs little CPU but its RAM (about 500 MB).
+
+## 7. RAM limit
+
+**Maximaler RAM** (MB) is passed as `--max-ram`. A Godot game cannot cap its own memory, so the limit is soft - the
+server watches itself:
+
+* Every 5 seconds it reads its memory (Linux: the resident memory, Windows: the working set). The console's `status`
+  shows it: `RAM 600 MB (Grenze 1024 MB, Spitze 610 MB)` (limit, highest so far).
+* At the start the log shows `RAM-Grenze: 1024 MB (der leere Server belegt 485 MB).` (the empty server's use). If the
+  limit leaves too little room for missions, it says so: `Warnung: Für Einsätze ist die RAM-Grenze knapp – besser
+  mindestens 1024 MB.` (the limit is tight, better at least …).
+* From 90 % of the limit, a running mission keeps only 100 objects on the server's floor (spent cases, magazines,
+  shards, rubble - nobody sees the server's floor; the players keep theirs).
+* Above the limit the log warns: `Warnung: RAM-Grenze überschritten – 1100 von 1024 MB.` (limit exceeded). The server
+  keeps running.
+
+An empty server needs about 500 MB, a mission more, depending on the map and the enemies. The memory stays near the
+largest mission played until the server stops; the sleep mode frees all of it. For a **hard** limit, run the instance
+in a Docker container and set AMP's container memory limit (edit the instance in AMP's instance list): at that limit
+the system ends the server.
+
+## 8. Playing
 
 In the game: **Multiplayer → Beitreten** (join), enter the server's `address:port` as the lobby code (e.g.
 `203.0.113.7:47250` or `swat.example.com:47250`) and the password. The server's name is shown at the top of the lobby.
@@ -97,14 +137,14 @@ In the game: **Multiplayer → Beitreten** (join), enter the server's `address:p
 * **Version:** the server and the players need **the same game version**; otherwise the server refuses with "Andere
   Spielversion" (different game version).
 
-## 7. Console
+## 9. Console
 
 The commands work in English and in German; the answers are German.
 
 | Command | Effect |
 |---|---|
 | `help` | all commands |
-| `status` | state, frame rate, settings, players |
+| `status` | state, frame rate, RAM, settings, players |
 | `players` | players with slot, leader, ready |
 | `maps` | playable maps (the IDs for `set map`) |
 | `set <option> <value>` | e.g. `set enemies many`, `set map random`, `set mode hostages`, `set ff off`, `set max-players 3` |
@@ -120,11 +160,22 @@ Options for `set`: `map`, `mode` (hunt / bomb / hostages), `enemies` (none / few
 normal / hard), `time` (day / night / random), `season` (map / spring / summer / autumn / winter), `ff` (on / off),
 `max-players` (2–4), and for random maps `size`, `indoor`, `traps` (a step from 0, as on the game's sliders).
 
-## 8. New game version
+## 10. New game version
 
 1. Put the new server archive at the same download address, or upload it.
 2. Click **Update**.
 3. Restart the server.
+
+The players need the same game version as the server.
+
+## 11. New template version
+
+When this repository changed (see `CHANGELOG.md`):
+
+1. In AMP (the ADS instance): **Configuration → Instance Deployment → Configuration Repositories → Fetch**.
+2. In the instance list, click the **Update** button on the Swatted instance's tile (older AMP versions: right-click
+   the instance → **Refresh Configuration**). Only this takes the new template; "Update" inside the instance does not.
+3. Open the instance, check the new settings, and restart the server.
 
 ## Troubleshooting
 
@@ -133,3 +184,7 @@ normal / hard), `time` (day / night / random), `season` (map / spring / summer /
 * **AMP stays at "Starting":** look at the console. "kein freier UDP-Port" (no free UDP port) means the port is taken.
   If the program is missing, Update ran without an archive (check the download address, or upload it by hand).
 * **Linux: "Permission denied":** click **Update** once; it sets the execute permission.
+* **The first join after a while fails:** the server was asleep. Join again after a few seconds, or update the game:
+  newer versions wait for the server to wake up.
+* **The server sleeps while someone plays:** AMP counted nobody. Check that the console shows the `Beigetreten` lines;
+  with a server build from before the player ID, two players of the same name count as one - update the server.
