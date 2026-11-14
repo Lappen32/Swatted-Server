@@ -9,7 +9,7 @@ guide quotes them as they appear, with their meaning next to them.
 
 | File | Contents |
 |---|---|
-| `swatted.kvp` | program, command line, stop command `quit`, detection of "Server bereit" (ready), joins and leaves |
+| `swatted.kvp` | program, command line, stop command `quit`, detection of "Server bereit" (ready), joins and leaves, sleep mode |
 | `swattedconfig.json` | the settings in AMP: Server (with the RAM limit), Einsatz (mission), Download |
 | `swattedports.json` | UDP port 47250 |
 | `swattedupdates.json` | "Update": fetch the server archive from your download address and unpack it |
@@ -19,7 +19,7 @@ guide quotes them as they appear, with their meaning next to them.
 
 **Status:** server start, console, log, the RAM limit and a game against bots are tested locally
 (`tests/dedicated_server_test` in the game's repository, also with the exported Windows build). On AMP 2.8 (Linux,
-Docker) start, console and stop work; sleep mode is off for now (step 6).
+Docker) start, console and stop work; sleep mode (on again in template version 4) is not tried there yet.
 
 ## 1. Get the server archive
 
@@ -91,15 +91,23 @@ server's firewall (and, for a server at home, in the router).
 
 ## 6. Sleep mode
 
-**Off for now.** AMP 2.8 has switched sleep mode off for all Generic-module templates while CubeCoders rework it, and
-with this template's sleep settings switched on, AMP's own stop hung in "Stopping" (template version 2; see
-`CHANGELOG.md`). The server is prepared for it: its join and leave lines carry the player's ID (`Beigetreten: <name>
-(n/max), ID <id>`), so AMP counts two players of the same name apart, and the game keeps trying for 20 seconds to join a
-server that is still starting. Once AMP supports sleep for templates like this one again, it can be switched back on in
-`swatted.kvp` (`App.SupportsUniversalSleep`, `App.UniversalSleepApplicationUDPPortRef=GamePort`, `Limits.SleepMode`).
+The template supports AMP's sleep mode, and it is **on** by default: once AMP has counted no player for 5 minutes, it
+stops the server and listens on its UDP port itself. While the server sleeps it uses no CPU and no RAM.
 
-Until then an empty server keeps running: little CPU, but its RAM (about 400 MB). To free it, stop the server in AMP
-(or let a schedule stop it at night).
+* **AMP version:** use AMP 2.8.0.10 or newer, which fixed sleep bugs of the earlier 2.8 builds. CubeCoders have switched
+  sleep mode off in their own templates for now (October 2026) while they test the reworked sleep; this template comes
+  from a repository of its own and keeps it. Should it misbehave, switch it off in the instance (see "Settings" below).
+* **Waking up:** the first player who joins wakes it. AMP starts the server, which takes a few seconds; the game keeps
+  trying for up to 20 seconds and shows "Verbinde … Ein Server im Ruhezustand braucht ein paar Sekunden." (connecting -
+  a sleeping server needs a few seconds), then the player is in the lobby. A game version without this retry gives up
+  after 8 seconds: join again once the console shows `Server bereit`.
+* **Back to sleep:** woken, but nobody joined within 2 minutes (the doze delay), the server sleeps again. Should a stray
+  packet on the port (a port scan) wake it, the doze delay puts it back to sleep.
+* **Counting players:** AMP counts them by the log lines `Beigetreten: <name> (n/max), ID <id>` (joined) and
+  `Verlassen: <name> (n/max), ID <id>` (left). The ID keeps two players of the same name apart. A server build from
+  before the ID logs the lines without it; the template still reads them, by name.
+* **Settings:** switching sleep off, the delays and "sleep on start" are AMP's own settings of the instance (its sleep
+  mode section). With sleep off the server keeps running; an empty lobby costs little CPU but its RAM (about 400 MB).
 
 ## 7. RAM limit
 
@@ -117,9 +125,9 @@ server watches itself:
   keeps running.
 
 An empty server needs about 400 MB (the exported build), a mission more, depending on the map and the enemies. The
-memory stays near the largest mission played until the server stops. For a **hard** limit, run the instance
-in a Docker container and set AMP's container memory limit (edit the instance in AMP's instance list): at that limit
-the system ends the server.
+memory stays near the largest mission played until the server stops; the sleep mode frees all of it. For a **hard**
+limit, run the instance in a Docker container and set AMP's container memory limit (edit the instance in AMP's
+instance list): at that limit the system ends the server.
 
 ## 8. Playing
 
@@ -172,6 +180,14 @@ When this repository changed (see `CHANGELOG.md`):
    the instance → **Refresh Configuration**). Only this takes the new template; "Update" inside the instance does not.
 3. Open the instance, check the new settings, and restart the server.
 
+**AMP 2.8: "Config manifest file does not exist: Plugins/ADSModule/DeploymentTemplates/--main/swattedconfig.json".**
+If the tile's **Update** ends with this error (ADS's notifications), AMP could not apply the new template: the instance
+keeps its old version (the new settings do not show), and it can hang in "Stopping", because AMP stops the server for
+the upgrade. This looks like a bug of AMP 2.8 with template repositories of one's own (an empty user and repository in
+the path; another one has been reported in CubeCoders' forum). The way round it is a new instance, which gets the
+current template: stop the old instance from ADS, create a new Swatted instance (step 3), enter the settings and the
+port again, upload the server archive or click **Update** in the instance (step 4), start it, then delete the old one.
+
 ## Troubleshooting
 
 * **"Keine Verbindung zum Host"** (no connection to the host) when joining: the UDP port is not open (firewall,
@@ -179,6 +195,10 @@ When this repository changed (see `CHANGELOG.md`):
 * **AMP stays at "Starting":** look at the console. "kein freier UDP-Port" (no free UDP port) means the port is taken.
   If the program is missing, Update ran without an archive (check the download address, or upload it by hand).
 * **Linux: "Permission denied":** click **Update** once; it sets the execute permission.
-* **AMP stays at "Stopping":** the console shows `Server wird beendet.` but AMP does not notice the end. With template
-  version 2 (sleep mode on) this happened on AMP 2.8: fetch the template again and update the instance (step 11) to get
-  version 3. Until then, stop or restart the whole instance from ADS.
+* **AMP stays at "Stopping":** the console shows `Server wird beendet.` but AMP does not finish. On AMP 2.8 this
+  came with a template upgrade that had failed (step 11, the "--main" error): stop or restart the whole instance from
+  ADS, and if the error comes again, use a new instance.
+* **The first join after a while fails:** the server was asleep. Join again after a few seconds, or update the game:
+  newer versions wait for the server to wake up.
+* **The server sleeps while someone plays:** AMP counted nobody. Check that the console shows the `Beigetreten` lines;
+  with a server build from before the player ID, two players of the same name count as one - update the server.
