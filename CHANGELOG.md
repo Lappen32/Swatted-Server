@@ -3,6 +3,15 @@
 The AMP template's versions. Each one raises `Meta.ConfigVersion` in `swatted.kvp`; after the merge, AMP takes it with
 **Fetch** and the instance's **Update** (README, step 11).
 
+## [3] – 2026-11-14
+
+### Changed
+
+- **Sleep mode off** again (`App.SupportsUniversalSleep=False`, `Limits.SleepMode=False`): AMP 2.8 has switched sleep
+  mode off for all Generic-module templates for now, and with it on AMP hung in "Stopping" after the server had ended.
+  The player IDs in the join / leave lines and the RAM limit stay.
+- README: the sleep mode section says why; troubleshooting for "Stopping".
+
 ## [2] – 2026-11-14
 
 Needs a Swatted server build that knows `--max-ram` (0.11.0 from the branch `feat/server-ram-sleep` on). An older
