@@ -107,6 +107,11 @@ stops the server and listens on its UDP port itself. While the server sleeps it 
 * **Counting players:** AMP counts them by the log lines `Beigetreten: <name> (n/max), ID <id>` (joined) and
   `Verlassen: <name> (n/max), ID <id>` (left). The ID keeps two players of the same name apart. A server build from
   before the ID logs the lines without it; the template still reads them, by name.
+* **Why a player left:** from game version 0.12.0 on, the line after each `Verlassen` line says why:
+  `Grund: selbst verlassen` (he left), `Grund: Spiel beendet` (he closed the game), `Grund: Verbindung verloren`
+  (connection lost) or `Grund: entfernt` (removed by the leader or the `kick` command). It is a line of its own, so the
+  leave line keeps its form: no regex of the template reads it, and the template needs no new version for it. In a
+  running mission the players see the same in the top right corner of their screens.
 * **Settings:** switching sleep off, the delays and "sleep on start" are AMP's own settings of the instance (its sleep
   mode section). With sleep off the server keeps running; an empty lobby costs little CPU but its RAM (about 400 MB).
 
