@@ -18,9 +18,10 @@ guide quotes them as they appear, with their meaning next to them.
 | `CHANGELOG.md` | the template's versions (`Meta.ConfigVersion`) |
 
 **Status:** server start, console, log, the RAM limit and a game against bots are tested locally
-(`tests/dedicated_server_test` in the game's repository, also with the exported Windows build). On AMP 2.8 (Linux,
-Docker) start, console and stop work; sleep mode (on again in template version 4) is not tried there yet. jemalloc
-(template version 5) is measured with the exported Linux build, not yet in AMP's container.
+(`tests/dedicated_server_test` in the game's repository, also with the exported Windows build; the template last
+checked against game 0.12.0). On AMP 2.8 (Linux, Docker) start, console and stop work; sleep mode (on again in
+template version 4) is not tried there yet. jemalloc (template version 5) is measured with the exported Linux build,
+not yet in AMP's container.
 
 ## 1. Get the server archive
 
@@ -107,6 +108,11 @@ stops the server and listens on its UDP port itself. While the server sleeps it 
 * **Counting players:** AMP counts them by the log lines `Beigetreten: <name> (n/max), ID <id>` (joined) and
   `Verlassen: <name> (n/max), ID <id>` (left). The ID keeps two players of the same name apart. A server build from
   before the ID logs the lines without it; the template still reads them, by name.
+* **Why a player left:** from game version 0.12.0 on, the line after each `Verlassen` line says why:
+  `Grund: selbst verlassen` (left on purpose), `Grund: Spiel beendet` (closed the game), `Grund: Verbindung verloren`
+  (connection lost) or `Grund: entfernt` (removed by the leader or the `kick` command). It is a line of its own, so the
+  leave line keeps its form: no regex of the template reads it, and the template needs no new version for it. In a
+  running mission the players see the same in the top right corner of their screens.
 * **Settings:** switching sleep off, the delays and "sleep on start" are AMP's own settings of the instance (its sleep
   mode section). With sleep off the server keeps running; an empty lobby costs little CPU but its RAM (about 400 MB).
 
